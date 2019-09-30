@@ -154,9 +154,12 @@ head(male_whit_tbl, 10)
 ## coding for a scatterplot
 malwhit_name_plot <- ggplot(male_whit_tbl, aes(x = rank, y = count, color = "blue")) + 
   geom_point(aes(size = count), alpha = .25) + 
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  xlab("Rank of Top 100 male babay names") +
+  ylab("Counts of each Top 100 baby names") +
+  ggtitle(toupper("Count vs Rank of Top 100 Male Baby Names in NYC"))
 malwhit_name_plot
-## Since the baby names are too many, I delete the legend to show the scatterplot
+## Since the baby names are too many, I delete the legend and use size of point to show different names in the scatterplot
 
 ```
 
