@@ -11,46 +11,43 @@ output: github_document
 library(tidyverse)
 library(readxl)
 
-# help get relative paths 
-getwd()
-
 # read and clean Mr. Trash Wheel sheet
 water_total_data <- 
-  read_excel("E:./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+  read_excel("./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
            sheet = "Mr. Trash Wheel",
            range = "A2:N338") %>% 
   janitor::clean_names() %>% 
   drop_na(dumpster) %>% 
   mutate(sports_balls = round(sports_balls),
          sports_balls = as.integer(sports_balls))
-view(water_total_data)
+head(water_total_data, 10)
 
 # read and clean percipitation data for 2017 and 2018
-water_17data <- read_excel("E:./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+water_17data <- read_excel("./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
                            sheet = "2017 Precipitation", skip = 1) %>% 
   janitor::clean_names() %>% 
   select(month, tl_precip = total) %>% 
   drop_na(month, tl_precip) %>% 
   mutate(year = "2017")
+head(water_17data, 10)
 
-water_18data <- read_excel("E:./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+water_18data <- read_excel("./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
                            sheet = "2018 Precipitation", skip = 1) %>% 
   janitor::clean_names() %>% 
   select(month, tl_precip = total) %>% 
   drop_na(month, tl_precip) %>% 
   mutate(year = "2018")
-view(water_17data)
-view(water_18data)
+head(water_18data, 10)
 
 # combine 2017 and 2018 precipitation datasets
 comb_data <- left_join(water_17data, water_18data, by = "month") %>% 
   mutate(month = month.name)
-view(comb_data)
+head(comb_data, 10)
 
 # get water data in 2017
 filt_17data <- filter(water_total_data, year == "2017")
 
-view(filt_17data)
+head(filt_17data, 10)
 
 
 ```
@@ -69,7 +66,7 @@ The median number of sports balls in 2017 is `r median(pull(filt_17data, sports_
 
 ```{r problem 2, message = FALSE}
 # read and clean data in pols_month
-pol_dat <- read_csv("E:./original_data/fivethirtyeight_datasets/pols-month.csv") %>% 
+pol_dat <- read_csv("./original_data/fivethirtyeight_datasets/pols-month.csv") %>% 
   janitor::clean_names() %>% 
   separate(mon, into = c("year", "month", "day"), 
            sep = "-", convert = TRUE) %>%
@@ -77,32 +74,32 @@ pol_dat <- read_csv("E:./original_data/fivethirtyeight_datasets/pols-month.csv")
   mutate(month = month.abb[month],
          president = recode(president, `0` = "gop",
                             `1` = "dem"))
-view(pol_dat)
+head(pol_dat, 10)
 
 
 # read and clean data in snp
-snp_dat <- read_csv("E:./original_data/fivethirtyeight_datasets/snp.csv") %>%
+snp_dat <- read_csv("./original_data/fivethirtyeight_datasets/snp.csv") %>%
   janitor::clean_names() %>% 
   mutate(date = as.Date(date, "%m/%d/%Y")) %>% 
   separate(date, into = c("year", "month", "day"), sep = "-", convert = TRUE) %>% 
   select(year, month, snp_value = close) %>% 
   arrange(year, month) %>% 
   mutate(month = month.abb[month]) 
-view(snp_dat)
+head(snp_dat, 10)
 
 # read and clean unemployment data
-unemply_dat <- read_csv("E:./original_data/fivethirtyeight_datasets/unemployment.csv") %>% 
+unemply_dat <- read_csv("./original_data/fivethirtyeight_datasets/unemployment.csv") %>% 
   janitor::clean_names() %>% 
   pivot_longer(jan:dec,
                names_to = "month",
                values_to = "unemply_rate") %>% 
   mutate(month = str_to_title(month))
-view(unemply_dat)
+head(unemply_dat, 10)
 
 # join above three datasets
 comb_3data <- left_join(pol_dat, snp_dat, by = c("year", "month")) %>% 
   left_join(unemply_dat, by = c("year", "month"))
-view(comb_3data)
+head(comb_3data, 10)
 ```
 
 *pol_dat* contains the number of polls and give which party held the president position. *snp_dat* contains stock prices at closed points. *unemply_dat* contains unemployment rate each month of each year. 
@@ -110,6 +107,7 @@ view(comb_3data)
 The result dataset is a combined one, whose dimension is `r dim(comb_3data)`. 
 
 The range of year in *comb_3data* is `r range(pull(comb_3data,year))`. 
+
 The names of key variables are `r names(comb_3data)`.
 
 
@@ -117,16 +115,17 @@ The names of key variables are `r names(comb_3data)`.
 
 ```{r problem 3, message = FALSE}
 # load and clean NYC baby name dataset
-nyc_baby_name <- read_csv("E:./original_data/Popular_Baby_Names.csv") %>% 
+nyc_baby_name <- read_csv("./original_data/Popular_Baby_Names.csv") %>% 
   janitor::clean_names() %>% 
   mutate(gender = str_to_lower(gender),
          ethnicity = str_to_lower(ethnicity),
-         ethnicity = replace(ethnicity, ethnicity == "asian and paci", "asian and pacific islander"),
-         ethnicity = replace(ethnicity, ethnicity == "black non hisp", "black non hispanic"),
-         ethnicity = replace(ethnicity, ethnicity == "white non hisp", "white non hispanic"),
+         ethnicity = recode(ethnicity, `asian and paci` = "asian and pacific islander"),
+         ethnicity = recode(ethnicity, `black non hisp` = "black non hispanic"),
+         ethnicity = recode(ethnicity, `white non hisp` = "white non hispanic"),
          childs_first_name = str_to_title(childs_first_name)) %>% 
   distinct(childs_first_name, year_of_birth, gender, ethnicity, .keep_all = TRUE)
-view(nyc_baby_name)
+head(nyc_baby_name, 10)
+
 
 # name of olivia female babies table
 olivia_female_tbl <- filter(nyc_baby_name, childs_first_name == "Olivia",
@@ -134,7 +133,7 @@ olivia_female_tbl <- filter(nyc_baby_name, childs_first_name == "Olivia",
   select(year_of_birth, ethnicity, rank) %>% 
   pivot_wider(names_from = "ethnicity",
               values_from = "rank") 
-view(olivia_female_tbl)
+head(olivia_female_tbl, 10)
 
 # popular male babies name table
 popname_male_tbl <- filter(nyc_baby_name, rank == "1",
@@ -142,7 +141,7 @@ popname_male_tbl <- filter(nyc_baby_name, rank == "1",
   select(year_of_birth, ethnicity, childs_first_name) %>% 
   pivot_wider(names_from = "ethnicity",
               values_from = "childs_first_name")
-view(popname_male_tbl)
+head(popname_male_tbl, 10)
 
 
 # scatterplot with count against rank in male white non-hispanic baby name
@@ -150,13 +149,14 @@ view(popname_male_tbl)
 male_whit_tbl <- filter(nyc_baby_name, ethnicity == "white non hispanic",
                               gender == "male", 
                               year_of_birth == "2016")
-view(male_whit_tbl)
+head(male_whit_tbl, 10)
 
 ## coding for a scatterplot
 malwhit_name_plot <- ggplot(male_whit_tbl, aes(x = rank, y = count)) + 
   geom_point(aes(color = childs_first_name), alpha = .5) + 
   theme(legend.position = "none")
 malwhit_name_plot
+## Since the baby names are too many, I delete the legend to show the scatterplot
 
 ```
 
