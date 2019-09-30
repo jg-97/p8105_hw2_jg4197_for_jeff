@@ -67,7 +67,7 @@ The median number of sports balls in 2017 is `r median(pull(filt_17data, sports_
 
 ## politic and economic datasets tidiness
 
-```{r problem 2}
+```{r problem 2, message = FALSE}
 # read and clean data in pols_month
 pol_dat <- read_csv("E:./original_data/fivethirtyeight_datasets/pols-month.csv") %>% 
   janitor::clean_names() %>% 
@@ -147,7 +147,7 @@ The range of year in *comb_3data* is `r range(pull(comb_3data,year))`.
 The names of key variables are `r names(comb_3data)`.
 
 
-## NYC popularity of baby names
+## NYC popularity of baby names tidiness
 
 ```{r problem 3, message = FALSE}
 # load and clean NYC baby name dataset
@@ -181,14 +181,16 @@ view(popname_male_tbl)
 
 # scatterplot with count against rank in male white non-hispanic baby name
 ## create a table as a variable for plotting
-male_whitnonhis_tbl <- filter(nyc_baby_name, ethnicity == "white non hispanic",
+male_whit_tbl <- filter(nyc_baby_name, ethnicity == "white non hispanic",
                               gender == "male", 
                               year_of_birth == "2016")
-view(male_whitnonhis_tbl)
+view(male_whit_tbl)
 
 ## coding for a scatterplot
-malewhit_babname_plot <- ggplot(male_whitnonhis_tbl, aes(x = rank, y = count)) + geom_point(aes(color = childs_first_name), alpha = .5)
+malwhit_name_plot <- ggplot(male_whit_tbl, aes(x = rank, y = count)) + 
+  geom_point(aes(color = childs_first_name), alpha = .5) + 
+  theme(legend.position = "none")
+malwhit_name_plot
 
 ```
-Since the number of scatter is too large to picture a plot
 
