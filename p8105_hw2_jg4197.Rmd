@@ -13,17 +13,19 @@ library(readxl)
 
 # read and clean Mr. Trash Wheel sheet
 water_total_data <- 
-  read_excel("./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+  read_excel("./original_data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
            sheet = "Mr. Trash Wheel",
-           range = "A2:N338") %>% 
+           range = "A2:N408") %>% 
   janitor::clean_names() %>% 
   drop_na(dumpster) %>% 
   mutate(sports_balls = round(sports_balls),
-         sports_balls = as.integer(sports_balls))
+         sports_balls = as.integer(sports_balls),
+         date = as.Date(date))
 head(water_total_data, 10)
 
+
 # read and clean percipitation data for 2017 and 2018
-water_17data <- read_excel("./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+water_17data <- read_excel("./original_data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
                            sheet = "2017 Precipitation", skip = 1) %>% 
   janitor::clean_names() %>% 
   select(month, tl_precip = total) %>% 
@@ -31,7 +33,7 @@ water_17data <- read_excel("./original_data/HealthyHarborWaterWheelTotals2018-7-
   mutate(year = "2017")
 head(water_17data, 10)
 
-water_18data <- read_excel("./original_data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+water_18data <- read_excel("./original_data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
                            sheet = "2018 Precipitation", skip = 1) %>% 
   janitor::clean_names() %>% 
   select(month, tl_precip = total) %>% 
@@ -46,20 +48,19 @@ head(comb_data, 10)
 
 # get water data in 2017
 filt_17data <- filter(water_total_data, year == "2017")
-
 head(filt_17data, 10)
 
-
 ```
-The total precipitation of 2018 is `r sum(pull(water_18data, tl_precip))`.
+The _total precipitation of 2018_ is `r sum(pull(water_18data, tl_precip))`.
 
-The total observations is `r count(water_total_data)`.
+The _total observations_ is `r count(water_total_data)`.
 
-The number of 2017 and 2018 precipitation data is `r count(comb_data)`.
+The number of _2017 and 2018 precipitation data_ is `r count(comb_data)`.
 
-The key variables in the total dataset is `r names(water_total_data)`.
+The _key variables_ in the total dataset is `r names(water_total_data)`.
 
-The median number of sports balls in 2017 is `r median(pull(filt_17data, sports_balls))`.
+The median number of _sports balls_ in 2017 is `r median(pull(filt_17data, sports_balls))`.
+
 
 
 ## politic and economic datasets tidiness
