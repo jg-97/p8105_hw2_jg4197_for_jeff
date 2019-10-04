@@ -28,16 +28,16 @@ head(water_total_data, 10)
 water_17data <- read_excel("./original_data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
                            sheet = "2017 Precipitation", skip = 1) %>% 
   janitor::clean_names() %>% 
-  select(month, tl_precip = total) %>% 
-  drop_na(month, tl_precip) %>% 
+  select(month, tl_17precip = total) %>% 
+  drop_na(month, tl_17precip) %>% 
   mutate(year = "2017")
 head(water_17data, 10)
 
 water_18data <- read_excel("./original_data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
                            sheet = "2018 Precipitation", skip = 1) %>% 
   janitor::clean_names() %>% 
-  select(month, tl_precip = total) %>% 
-  drop_na(month, tl_precip) %>% 
+  select(month, tl_18precip = total) %>% 
+  drop_na(month, tl_18precip) %>% 
   mutate(year = "2018")
 head(water_18data, 10)
 
@@ -46,18 +46,20 @@ comb_data <- left_join(water_17data, water_18data, by = "month") %>%
   mutate(month = month.name)
 head(comb_data, 10)
 
-# get water data in 2017
+# get water data in 2017 for inline R code
 filt_17data <- filter(water_total_data, year == "2017")
 head(filt_17data, 10)
 
+names(comb_data)
 ```
-The _total precipitation of 2018_ is `r sum(pull(water_18data, tl_precip))`.
 
-The _total observations_ is `r count(water_total_data)`.
+The _total observations_ is `r count(select(water_total_data, weight_tons:homes_powered))`.
 
-The number of _2017 and 2018 precipitation data_ is `r count(comb_data)`.
+The _total observations_ of _2017 and 2018 precipitation data_ is `r count(select(comb_data, tl_17precip)) + count(select(comb_data, tl_18precip))`.
 
-The _key variables_ in the total dataset is `r names(water_total_data)`.
+The _key variables_ in joining 2017 and 2018 data is `r names(comb_data)`.The _key variables_ in total water data is `r names(water_total_data)`.
+
+The total precipitation in 2018 is `r sum(pull(water_18data, tl_18precip))`.
 
 The median number of _sports balls_ in 2017 is `r median(pull(filt_17data, sports_balls))`.
 
@@ -75,6 +77,7 @@ pol_dat <- read_csv("./original_data/fivethirtyeight_datasets/pols-month.csv") %
   mutate(month = month.abb[month],
          president = recode(president, `0` = "gop",
                             `1` = "dem"))
+## "convert = TRUE" in separate function can make column identified as integer and numeric when this column has number or integer
 head(pol_dat, 10)
 
 
@@ -86,6 +89,7 @@ snp_dat <- read_csv("./original_data/fivethirtyeight_datasets/snp.csv") %>%
   select(year, month, snp_value = close) %>% 
   arrange(year, month) %>% 
   mutate(month = month.abb[month]) 
+## change the variable name of "close" to make it easy to understand
 head(snp_dat, 10)
 
 # read and clean unemployment data
@@ -109,7 +113,7 @@ The result dataset is a combined one, whose dimension is `r dim(comb_3data)`.
 
 The range of year in *comb_3data* is `r range(pull(comb_3data,year))`. 
 
-The names of key variables are `r names(comb_3data)`.
+The names of key variables are `r names(comb_3data)`. The important variables in combining is year and month. 
 
 
 ## NYC popularity of baby names tidiness
@@ -133,7 +137,8 @@ olivia_female_tbl <- filter(nyc_baby_name, childs_first_name == "Olivia",
                      gender == "female") %>% 
   select(year_of_birth, ethnicity, rank) %>% 
   pivot_wider(names_from = "ethnicity",
-              values_from = "rank") 
+              values_from = "rank") %>% 
+  janitor::clean_names()
 head(olivia_female_tbl, 10)
 
 # popular male babies name table
@@ -141,7 +146,8 @@ popname_male_tbl <- filter(nyc_baby_name, rank == "1",
                         gender == "male") %>% 
   select(year_of_birth, ethnicity, childs_first_name) %>% 
   pivot_wider(names_from = "ethnicity",
-              values_from = "childs_first_name")
+              values_from = "childs_first_name") %>% 
+  janitor::clean_names()
 head(popname_male_tbl, 10)
 
 
@@ -153,7 +159,7 @@ male_whit_tbl <- filter(nyc_baby_name, ethnicity == "white non hispanic",
 head(male_whit_tbl, 10)
 
 ## coding for a scatterplot
-malwhit_name_plot <- ggplot(male_whit_tbl, aes(x = rank, y = count, color = "blue")) + 
+malwhit_name_plot <- ggplot(male_whit_tbl, aes(x = rank, y = count, color = "red")) + 
   geom_point(aes(size = count), alpha = .25) + 
   theme(legend.position = "none") +
   xlab("Rank of Top 100 male babay names") +
